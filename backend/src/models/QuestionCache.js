@@ -6,6 +6,18 @@ const questionCacheSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
+  documentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Document',
+    required: false,
+    index: true
+  },
   answer: {
     type: String,
     required: true

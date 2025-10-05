@@ -36,7 +36,10 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     } catch (error) {
-      logout();
+      // If the backend is not available, just set loading to false
+      // Don't logout automatically as the user might still be valid
+      console.warn('Backend not available, continuing without token verification');
+      setLoading(false);
     }
   };
 

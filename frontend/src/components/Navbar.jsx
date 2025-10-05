@@ -8,11 +8,14 @@ function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
-  if (!user) return null;
+  // Hide navbar on the hero page for guests to keep a clean landing view
+  if (!user && isActive('/')) {
+    return null;
+  }
 
   return (
     <nav className="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200/50">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="w-full px-4">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center space-x-2">
@@ -52,7 +55,7 @@ function Navbar() {
                 </svg>
                 <span>Ask Questions</span>
               </Link>
-              {user.role === 'admin' && (
+              {user && user.role === 'admin' && (
                 <Link
                   to="/admin"
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
@@ -70,26 +73,45 @@ function Navbar() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
-              <div className="w-6 h-6 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-white">
-                  {user.email.charAt(0).toUpperCase()}
-                </span>
+            {user ? (
+              <>
+                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
+                  <div className="w-6 h-6 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">
+                      {user.email.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">{user.email}</div>
+                    <div className="text-xs text-gray-500 capitalize">{user.role}</div>
+                  </div>
+                </div>
+                <button
+                  onClick={logout}
+                  className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/login"
+                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-lg hover:from-orange-700 hover:to-amber-700 transition-all duration-200 font-medium"
+                >
+                  Get Started
+                </Link>
               </div>
-              <div className="text-sm">
-                <div className="font-medium text-gray-900">{user.email}</div>
-                <div className="text-xs text-gray-500 capitalize">{user.role}</div>
-              </div>
-            </div>
-            <button
-              onClick={logout}
-              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span>Logout</span>
-            </button>
+            )}
           </div>
         </div>
       </div>

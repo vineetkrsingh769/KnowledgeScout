@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 
 function AskPage() {
+  const location = useLocation();
   const [query, setQuery] = useState('');
   const [answer, setAnswer] = useState('');
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cached, setCached] = useState(false);
   const { token } = useAuth();
+
+  const documentId = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('docId') || undefined;
+  }, [location.search]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +27,7 @@ function AskPage() {
     
     try {
       const response = await axios.post('/api/ask', 
-        { query: query.trim(), k: 3 }
+        { query: query.trim(), k: 3, documentId }
       );
       
       setAnswer(response.data.answer);
@@ -40,7 +47,7 @@ function AskPage() {
         <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mb-4">
           Ask Questions
         </h1>
-        <p className="text-gray-600 text-lg">Get intelligent answers from your documents</p>
+        <p className="text-gray-600 text-lg">Get intelligent answers from your documents{documentId ? ' (filtered to one document)' : ''}</p>
       </div>
       
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">

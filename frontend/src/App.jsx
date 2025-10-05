@@ -37,36 +37,30 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          <Route path="/" element={<HeroPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/docs" element={
-            <ProtectedRoute>
-              <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
-                <Navbar />
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<HeroPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/docs" element={
+              <ProtectedRoute>
                 <DocsPage />
-              </div>
-            </ProtectedRoute>
-          } />
-          <Route path="/ask" element={
-            <ProtectedRoute>
-              <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
-                <Navbar />
+              </ProtectedRoute>
+            } />
+            <Route path="/ask" element={
+              <ProtectedRoute>
                 <AskPage />
-              </div>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin" element={
-            <ProtectedRoute adminOnly={true}>
-              <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
-                <Navbar />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute adminOnly={true}>
                 <AdminPage />
-              </div>
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
       </Router>
     </AuthProvider>
   );

@@ -162,4 +162,32 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
+// Delete specific document
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const document = await Document.findOneAndDelete({
+      _id: req.params.id,
+      owner: req.user.id
+    });
+
+    if (!document) {
+      return res.status(404).json({
+        error: {
+          code: "DOCUMENT_NOT_FOUND",
+          message: "Document not found"
+        }
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({
+      error: {
+        code: "DELETE_FAILED",
+        message: "Failed to delete document"
+      }
+    });
+  }
+});
+
 module.exports = router;

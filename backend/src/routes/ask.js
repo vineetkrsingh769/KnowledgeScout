@@ -2,13 +2,15 @@ const express = require('express');
 const { auth } = require('../middleware/auth');
 const QuestionCache = require('../models/QuestionCache');
 const Document = require('../models/Document');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+require('dotenv').config();
 
 const router = express.Router();
 
 // Ask question
 router.post('/', auth, async (req, res) => {
   try {
-    const { query, k = 3 } = req.body;
+    const { query, k = 3, documentId } = req.body;
 
     if (!query) {
       return res.status(400).json({
@@ -20,8 +22,8 @@ router.post('/', auth, async (req, res) => {
       });
     }
 
-    // Check cache first
-    const cached = await QuestionCache.findOne({ query });
+    // Check cache first (scoped by user and document)
+    const cached = await QuestionCache.findOne({ query, userId: req.user.id, documentId: documentId || null });
     if (cached) {
       return res.json({
         answer: cached.answer,
@@ -30,8 +32,12 @@ router.post('/', auth, async (req, res) => {
       });
     }
 
-    // Get user's documents
-    const userDocs = await Document.find({ owner: req.user.id });
+    // Get user's documents (optionally filter to a single document)
+    const docFilter = { owner: req.user.id };
+    if (documentId) {
+      docFilter._id = documentId;
+    }
+    const userDocs = await Document.find(docFilter);
     
     // Simple text-based search
     const results = [];
@@ -63,13 +69,35 @@ router.post('/', auth, async (req, res) => {
     results.sort((a, b) => b.score - a.score);
     const topResults = results.slice(0, k);
 
-    // Generate answer based on top results
+    // Try LLM generation with Gemini if API key is available; otherwise fallback to stitched summary
     let answer = "I couldn't find relevant information in your documents.";
-    if (topResults.length > 0) {
+    const hasContext = topResults.length > 0;
+    if (hasContext && process.env.GEMINI_API_KEY) {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const context = topResults.map(r => `From "${r.documentName}" page ${r.pageNumber}:\n${r.content}`).join('\n\n');
+        const prompt = `You are a helpful assistant. Answer strictly using the provided context. If the answer is not present, say "The answer is not available in the uploaded documents."\n\nContext:\n${context}\n\nQuestion:\n${query}`;
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+        if (text && text.trim().length > 0) {
+          answer = text.trim();
+        }
+      } catch (e) {
+        // Fallback to stitched summary if LLM fails
+        const sourceText = topResults.length === 1 ? 
+          `Page ${topResults[0].pageNumber} of "${topResults[0].documentName}"` :
+          `${topResults.length} different pages`;
+        answer = `Based on your documents, I found relevant information in ${sourceText}. ` +
+                 `Here's what I found:\n\n` +
+                 topResults.map(r => 
+                   `From "${r.documentName}" page ${r.pageNumber}: ${r.content.substring(0, 200)}...`
+                 ).join('\n\n');
+      }
+    } else if (hasContext) {
       const sourceText = topResults.length === 1 ? 
         `Page ${topResults[0].pageNumber} of "${topResults[0].documentName}"` :
         `${topResults.length} different pages`;
-      
       answer = `Based on your documents, I found relevant information in ${sourceText}. ` +
                `Here's what I found:\n\n` +
                topResults.map(r => 
@@ -80,6 +108,8 @@ router.post('/', auth, async (req, res) => {
     // Cache the result
     await QuestionCache.create({
       query,
+      userId: req.user.id,
+      documentId: documentId || null,
       answer,
       sources: topResults
     });
