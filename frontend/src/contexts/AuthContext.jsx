@@ -1,6 +1,12 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 
+// Configure base URL for production deployments (e.g., Render)
+// Set VITE_API_BASE to your backend origin, e.g., https://knowledgescout-backend-13hx.onrender.com
+if (import.meta && import.meta.env && import.meta.env.VITE_API_BASE) {
+  axios.defaults.baseURL = import.meta.env.VITE_API_BASE;
+}
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
