@@ -43,49 +43,73 @@ Architecture Overview
 
 Installation / Setup
 --------------------
-1. Prerequisites
-   - Node 18+
-   - MongoDB running locally or a connection string
 
-2. Clone and install
+### 1. Prerequisites
+- **Node.js**: Version 18 or higher.
+- **MongoDB**: A running local MongoDB instance or a MongoDB Atlas connection string.
+
+### 2. Configure Environment Variables
+Create a file named `.env` inside the `backend` directory and add the following configuration:
+```env
+MONGODB_URI=mongodb://localhost:27017/knowledgescout
+JWT_SECRET=your-strong-secret-key
+PORT=5000
+
+# Add your Gemini API key (optional for generating grounded answers)
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+### 3. Run the Application
+You can run the project using either of the two methods below.
+
+#### Method A: Unified Script (Recommended)
+This method installs dependencies and runs both the frontend and backend concurrently in a single terminal.
+
+1. **Install all dependencies** (run from the root directory):
    ```bash
-   git clone <repo-url>
-   cd KnowledgeScout
-   
-   # Backend
-   cd backend
-   npm install
-   
-   # Frontend
-   cd ../frontend
-   npm install
+   npm run install-all
    ```
-
-3. Environment variables
-   Create `backend/.env` with:
-   ```
-   MONGODB_URI=mongodb://localhost:27017/knowledgescout
-   JWT_SECRET=your-strong-secret
-   GEMINI_API_KEY=your_gemini_api_key   # optional for LLM answers
-   ```
-
-4. Run
+2. **Start both development servers**:
    ```bash
-   # Terminal 1: Backend
-   cd backend
    npm run dev
-   
-   # Terminal 2: Frontend
+   ```
+   *This command runs the backend on port `5000` and the frontend on port `3000` concurrently.*
+
+#### Method B: Separate Terminals
+1. **Setup & Run Backend**:
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+2. **Setup & Run Frontend**:
+   ```bash
    cd frontend
+   npm install
    npm run dev
    ```
 
-Usage
------
-1. Register or log in.
-2. Go to Documents and upload a PDF (10MB max).
-3. Use the Ask button on a document card to ask questions scoped to that file, or visit `/ask` to query across your library.
-4. Answers display with sources and page numbers.
+---
+
+Usage & Features
+----------------
+KnowledgeScout is built around a comprehensive user journey:
+
+1. **Landing / Hero Page (`/`)**:
+   - Offers a modern, orange-gradient interface featuring glassmorphic cards describing application features.
+   - Dynamic Call-To-Action (CTA) buttons: redirects guest users to **Get Started** / **Sign In**, and authenticated users directly to their dashboard.
+
+2. **Authentication**:
+   - Register or log in to create an account. Session tokens are securely managed.
+
+3. **Documents Management (`/docs`)**:
+   - Upload PDF documents (up to 10MB).
+   - View your document library, pagination, and file metadata.
+   - Delete documents or jump directly into scoped query questions.
+
+4. **Asking Questions (`/ask`)**:
+   - Ask natural language questions scoped to specific documents or search across your entire library.
+   - Responses are generated with grounded answers, including cited page numbers and document source snippets.
 
 Deployment
 ----------

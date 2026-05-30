@@ -1,0 +1,16 @@
+{
+  "name": "knowledgescout",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:backend": "npm --prefix backend install",
+    "install:frontend": "npm --prefix frontend install",
+    "install-all": "npm run install:backend && npm run install:frontend",
+    "start:backend": "npm --prefix backend run dev",
+    "start:frontend": "npm --prefix frontend run dev",
+    "dev": "npx concurrently \"npm run start:backend\" \"npm run start:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
