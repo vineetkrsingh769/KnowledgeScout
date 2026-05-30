@@ -134,7 +134,6 @@ API Endpoints
   - POST `/api/index/rebuild`
 
 Security & Rate Limiting
-------------------------
 - JWT auth required on protected routes; `adminAuth` for admin endpoints
 - Global rate limit: 60 req/min (keyed by user or IP)
 - Idempotent uploads via `Idempotency-Key`
